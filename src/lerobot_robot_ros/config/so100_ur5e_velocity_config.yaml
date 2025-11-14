@@ -100,10 +100,9 @@ joint_limits:
 # Fixed Positions
 fixed_positions:
   # wrist_2 is kept fixed since SO-100 has only 5 DOF
-  # Set dynamically to current position + 180 degrees (π radians) at launch
+  # Original value was -π/2 (-90°), adjusted by +180° to correct direction
   # The joint will actively move to and maintain this position during teleoperation
-  # (this config value is no longer used, position determined dynamically at runtime)
-  wrist_2: -1.5708
+  wrist_2: 1.5708  # π/2 radians (90 degrees)
 
 # Safety Settings
 safety:
