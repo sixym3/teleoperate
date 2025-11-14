@@ -32,7 +32,8 @@ control:
   # Higher gains = faster response but may cause oscillations
   # Lower gains = smoother but slower response
   # Format: [shoulder_pan, shoulder_lift, elbow, wrist_1, wrist_2, wrist_3]
-  joint_gains: [2.0, 2.0, 2.5, 2.5, 0.0, 2.5]
+  # wrist_2 gain is non-zero to actively move to and maintain fixed position
+  joint_gains: [2.0, 2.0, 2.5, 2.5, 2.5, 2.5]
 
   # Alternative: Single gain for all joints
   # uniform_gain: 2.0
@@ -99,8 +100,9 @@ joint_limits:
 # Fixed Positions
 fixed_positions:
   # wrist_2 is kept fixed since SO-100 has only 5 DOF
-  # Now set dynamically to current position + 180 degrees (π radians) at launch
-  # (this value is no longer used, kept for reference only)
+  # Set dynamically to current position + 180 degrees (π radians) at launch
+  # The joint will actively move to and maintain this position during teleoperation
+  # (this config value is no longer used, position determined dynamically at runtime)
   wrist_2: -1.5708
 
 # Safety Settings

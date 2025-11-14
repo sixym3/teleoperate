@@ -14,7 +14,7 @@ Joint Mapping:
     shoulder_lift           -> shoulder_lift_joint
     elbow_flex              -> elbow_joint
     wrist_flex              -> wrist_1_joint
-    (none)                  -> wrist_2_joint (FIXED at current + π at launch)
+    (none)                  -> wrist_2_joint (moves to & holds current + π at launch)
     wrist_roll              -> wrist_3_joint
     gripper                 -> gripper
 
@@ -118,7 +118,8 @@ class SO100UR5eVelocityTeleop:
         if k_gains is None:
             # Default conservative gains
             # [shoulder_pan, shoulder_lift, elbow, wrist_1, wrist_2, wrist_3]
-            self.k_gains = np.array([2.0, 2.0, 2.5, 2.5, 0.0, 2.5])
+            # wrist_2 gain is non-zero to actively move to and maintain fixed position
+            self.k_gains = np.array([2.0, 2.0, 2.5, 2.5, 2.5, 2.5])
         else:
             self.k_gains = np.array(k_gains)
 
