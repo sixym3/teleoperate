@@ -1,0 +1,114 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    # List of controllers to load on startup
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # Velocity controller for joint velocity control
+    joint_group_vel_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+    # Standard trajectory controller (can be used alongside, load only one at a time)
+    scaled_joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # Force-torque sensor controller (if using UR's built-in sensor)
+    force_torque_sensor_controller:
+      type: force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster
+
+    # Speed scaling state broadcaster (UR-specific)
+    speed_scaling_state_broadcaster:
+      type: ur_controllers/SpeedScalingStateBroadcaster
+
+    # Gripper controller (adjust based on your gripper)
+    robotiq_gripper_controller:
+      type: position_controllers/JointGroupPositionController
+
+
+# Joint State Broadcaster
+joint_state_broadcaster:
+  ros__parameters:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+    interfaces:
+      - position
+      - velocity
+
+
+# Joint Group Velocity Controller Configuration
+joint_group_vel_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+
+    command_interfaces:
+      - velocity
+
+    state_interfaces:
+      - position
+      - velocity
+
+
+# Scaled Joint Trajectory Controller (for position/trajectory control)
+scaled_joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    state_publish_rate: 100.0
+    action_monitor_rate: 20.0
+
+    constraints:
+      stopped_velocity_tolerance: 0.01
+      goal_time: 0.0
+
+
+# Force Torque Sensor Controller
+force_torque_sensor_controller:
+  ros__parameters:
+    sensor_name: tcp_fts_sensor
+    state_interface_names:
+      - force.x
+      - force.y
+      - force.z
+      - torque.x
+      - torque.y
+      - torque.z
+    frame_id: tool0
+
+
+# Speed Scaling State Broadcaster
+speed_scaling_state_broadcaster:
+  ros__parameters:
+    state_publish_rate: 100.0
+
+
+# Robotiq Gripper Controller (adjust joint names based on your gripper)
+robotiq_gripper_controller:
+  ros__parameters:
+    joints:
+      - robotiq_85_left_knuckle_joint

@@ -1,0 +1,149 @@
+# SO-100 to UR5e Velocity Teleoperation Configuration
+#
+# This file contains configuration for velocity-based teleoperation
+# from SO-100 leader arm to UR5e follower robot.
+
+# SO-100 Leader Configuration
+leader:
+  # USB port for SO-100 connection
+  port: "/dev/ttyUSB0"
+  # Baud rate (default for SO-100)
+  baudrate: 1000000
+
+# UR5e Follower Configuration
+follower:
+  # Velocity controller name (from ur5e_velocity_controllers.yaml)
+  velocity_controller_name: "joint_group_vel_controller"
+
+  # Maximum joint velocities (rad/s)
+  # Conservative values for safety: [j1, j2, j3, j4, j5, j6]
+  max_joint_velocities: [1.5, 1.5, 2.0, 2.0, 2.0, 2.0]
+
+  # Gripper controller (if using Robotiq gripper)
+  gripper_controller_name: "robotiq_gripper_controller"
+
+# Control Parameters
+control:
+  # Control loop rate in Hz
+  rate_hz: 100.0
+
+  # Per-joint proportional gains (K matrix)
+  # These convert position error to velocity: v = K * (target - current)
+  # Higher gains = faster response but may cause oscillations
+  # Lower gains = smoother but slower response
+  # Format: [shoulder_pan, shoulder_lift, elbow, wrist_1, wrist_2, wrist_3]
+  joint_gains: [2.0, 2.0, 2.5, 2.5, 0.0, 2.5]
+
+  # Alternative: Single gain for all joints
+  # uniform_gain: 2.0
+
+  # Velocity limits (rad/s) - Maximum allowed velocities
+  # Should match or be lower than follower.max_joint_velocities
+  velocity_limits: [1.5, 1.5, 2.0, 2.0, 2.0, 2.0]
+
+# Joint Mapping
+joint_mapping:
+  # SO-100 arm joints (5 DOF)
+  so100_joints:
+    - shoulder_pan
+    - shoulder_lift
+    - elbow_flex
+    - wrist_flex
+    - wrist_roll
+
+  # UR5e arm joints (6 DOF)
+  ur5e_joints:
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+
+  # Mapping explanation:
+  # SO-100 index → UR5e index
+  # 0: shoulder_pan → shoulder_pan_joint (0)
+  # 1: shoulder_lift → shoulder_lift_joint (1)
+  # 2: elbow_flex → elbow_joint (2)
+  # 3: wrist_flex → wrist_1_joint (3)
+  # 4: (none) → wrist_2_joint (4) - FIXED
+  # 5: wrist_roll → wrist_3_joint (5)
+
+  # Gripper joint name
+  gripper_joint: "robotiq_85_left_knuckle_joint"
+
+# Joint Limits
+joint_limits:
+  # SO-100 normalization ranges (from LeRobot config)
+  # Motors use RANGE_M100_100 for arm joints
+  so100:
+    min: -100.0
+    max: 100.0
+
+  # UR5e joint limits in radians
+  # Order: [shoulder_pan, shoulder_lift, elbow, wrist_1, wrist_2, wrist_3]
+  # Note: These are conservative limits, hardware may support wider range
+  ur5e:
+    min: [3.14, -3.49, -0.5, -4.37, 1.57, -3.14]
+    max: [-3.14, 0.35, 2.8, -0.785, -4.71, 3.14]
+
+  # Gripper limits
+  # SO-100: RANGE_0_100
+  # UR5e Robotiq: radians
+  gripper:
+    so100_min: 0.0
+    so100_max: 100.0
+    ur5e_open: 0.0      # Fully open position
+    ur5e_close: 0.8     # Fully closed position
+
+# Fixed Positions
+fixed_positions:
+  # wrist_2 is kept fixed since SO-100 has only 5 DOF
+  # This is approximately -90 degrees (-π/2 radians)
+  wrist_2: -1.5708
+
+# Safety Settings
+safety:
+  # Enable joint limit checking
+  check_joint_limits: true
+
+  # Warning threshold for approaching limits (percentage)
+  limit_warning_threshold: 0.9  # Warn at 90% of limit
+
+  # Emergency stop on limit violation
+  stop_on_limit: false  # Just warn, don't stop
+
+  # Watchdog timeout (seconds)
+  # Stop robot if no commands received within this time
+  watchdog_timeout: 1.0
+
+# Logging and Debugging
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+
+  # Print status updates
+  print_status: true
+
+  # Status print interval (control cycles)
+  status_interval: 100  # Print every 100 cycles (1 sec at 100 Hz)
+
+  # Record teleoperation data
+  record_data: false
+  record_file: "teleop_data.npz"
+
+# Advanced Options
+advanced:
+  # Use busy_wait for precise timing (recommended for high rates)
+  use_busy_wait: true
+
+  # Velocity filtering
+  # Apply low-pass filter to velocity commands
+  velocity_filter:
+    enabled: false
+    alpha: 0.3  # Filter coefficient (0-1, higher = less filtering)
+
+  # Deadband for small movements
+  deadband:
+    enabled: true
+    threshold: 0.02  # Ignore velocities below this (rad/s)
