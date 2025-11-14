@@ -14,7 +14,7 @@ Joint Mapping:
     shoulder_lift           -> shoulder_lift_joint
     elbow_flex              -> elbow_joint
     wrist_flex              -> wrist_1_joint
-    (none)                  -> wrist_2_joint (FIXED at -π/2)
+    (none)                  -> wrist_2_joint (FIXED at current + π at launch)
     wrist_roll              -> wrist_3_joint
     gripper                 -> gripper
 
@@ -111,7 +111,8 @@ class SO100UR5eVelocityTeleop:
         self.gripper_close = 0.8
 
         # wrist_2 fixed position (SO-100 has only 5 DOF)
-        self.wrist_2_fixed = -np.pi / 2  # -π/2 radians
+        # Will be set to current position + 180° after connecting
+        self.wrist_2_fixed = None
 
         # PID gains (K matrix) - Per-joint proportional gains
         if k_gains is None:
@@ -145,13 +146,19 @@ class SO100UR5eVelocityTeleop:
         print("\n[3/3] Waiting for joint states...")
         time.sleep(1.0)
 
-        # Get initial state
+        # Get initial state and set wrist_2 fixed position
         try:
             obs = self.follower.get_observation()
-            print("✓ Joint states received")
+            current_wrist_2 = obs["wrist_2_joint.pos"]
+            # Set wrist_2 to be 180 degrees (π radians) from current position
+            self.wrist_2_fixed = current_wrist_2 + np.pi
+            print(f"✓ Joint states received")
+            print(f"  Current wrist_2: {current_wrist_2:.3f} rad ({np.degrees(current_wrist_2):.1f}°)")
+            print(f"  Fixed wrist_2 set to: {self.wrist_2_fixed:.3f} rad ({np.degrees(self.wrist_2_fixed):.1f}°)")
         except Exception as e:
             print(f"⚠ Warning: Could not get initial joint states: {e}")
-            print("  Continuing anyway...")
+            print("  Using default wrist_2 position: -π/2")
+            self.wrist_2_fixed = -np.pi / 2
 
         print("\n" + "=" * 60)
         print("Teleoperation Configuration:")

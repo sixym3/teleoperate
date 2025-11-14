@@ -99,7 +99,8 @@ joint_limits:
 # Fixed Positions
 fixed_positions:
   # wrist_2 is kept fixed since SO-100 has only 5 DOF
-  # This is approximately -90 degrees (-π/2 radians)
+  # Now set dynamically to current position + 180 degrees (π radians) at launch
+  # (this value is no longer used, kept for reference only)
   wrist_2: -1.5708
 
 # Safety Settings
